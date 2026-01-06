@@ -1,5 +1,6 @@
+require('dotenv').config(); // Load environment variables
 const jwt = require("jsonwebtoken");
-const SECRET_KEY = "surya@123"; // Ideally, use environment variables to store secret keys
+const SECRET_KEY = process.env.JWT_SECRET || "surya@123"; // Using environment variable for secret key
 
 /*-------Generate JWT Token-------*/
 function generateToken(payload){
