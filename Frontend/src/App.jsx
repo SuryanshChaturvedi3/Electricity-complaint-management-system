@@ -6,7 +6,7 @@ import MainLayout from "./components/layout/MainLayout";
 
 
 // Student Pages
-import Login from "./pages/student/login";
+import Login from "./pages/student/Login";
 import Signup from "./pages/student/Signup";
 import Dashboard from "./pages/student/Dashboard";
 import RaiseComplaint from "./pages/student/RaiseComplaint";
