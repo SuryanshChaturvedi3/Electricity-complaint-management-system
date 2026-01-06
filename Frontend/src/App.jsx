@@ -57,6 +57,7 @@ function App() {
           <Route index element={<Navigate to="complaints" />} />
           <Route path="complaints" element={<TechnicianDashboard />} />
           <Route path="complaints/:id" element={<ComplaintDetail />} />
+            
         </Route>
       </Routes>
     </BrowserRouter>

@@ -6,6 +6,9 @@ const Authority = require("../models/authority");
 const Complaint = require("../models/complaint");
 const authority = require("../models/authority");
 const Technician = require("../models/technician");
+const verifyFirebaseToken = require("../middleware/verifyFirebaseToken");
+
+
 
 /*---------Authority Login Route---------*/
 router.post("/login", async (req, res) => {
@@ -143,5 +146,8 @@ router.put("/complaints/:id/assign", authenticateJWT, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+
+
 
 module.exports = router;

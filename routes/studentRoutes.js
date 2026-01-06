@@ -3,6 +3,8 @@ const router = express.Router(); // Creating router instance
 const { authenticateJWT, generateToken } = require("../jwt");
 const Student = require("../models/student");
 const Complaint = require("../models/complaint");
+const verifyFirebaseToken = require("../middleware/verifyFirebaseToken");
+
 
 /*---------------- Student Registration Route ----------------------------*/
 router.post("/signup", async (req, res) => {
@@ -132,7 +134,7 @@ router.post("/complaint", authenticateJWT, async (req, res) => {
 router.get("/complaints", authenticateJWT, async (req, res) => {
   try {
     // ✅ token se student id
-    const studentId = req.user.id;
+    const studentId = req.user.studentId;
 
     // ✅ sirf studentId se complaints
     const complaints = await Complaint.find({ studentId })
@@ -151,5 +153,32 @@ router.get("/complaints", authenticateJWT, async (req, res) => {
   }
 });
 
+/*----------Reset Password Route---------*/
+router.post("/reset-password", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ message: "No token" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decodedToken = await verifyFirebaseToken(token);
+    const studentId = decodedToken.uid; 
+    const { newPassword } = req.body;
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    student.password = newPassword;
+    
+    await student.save();
+
+    res.status(200).json({ message: "Password reset successful" });
+
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+});
 
 module.exports = router;

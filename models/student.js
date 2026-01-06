@@ -14,8 +14,17 @@ const studentSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-        match: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-
+        validate: {
+            validator: function(v) {
+                // Only validate on new documents or when password is being set initially
+                // Skip validation during password updates as pre-save hook will hash it
+                if (this.isNew || !this.isModified('password')) {
+                    return /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(v);
+                }
+                return true; // Allow any value during updates (will be hashed)
+            },
+            message: 'Password must be at least 8 characters and contain uppercase, lowercase, number and special character'
+        }
     },
     mobileNumber: {
         type: String,
