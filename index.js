@@ -10,6 +10,8 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const cors = require("cors"); // Import cors module for connecting frontend and backend
 const PORT = process.env.PORT || 3000;
+const dotenv = require("dotenv");
+dotenv.config();
 
 /*----------Database Connection--------------*/
 mongoose
@@ -35,12 +37,33 @@ app.use(
   cors({
     origin: process.env.ALLOWED_ORIGINS
       ? process.env.ALLOWED_ORIGINS.split(",")
-      : ["http://localhost:5173", "http://localhost:3000"],
+      : [ "http://localhost:5173",
+        "https://electricity-complaint-management-system-1.onrender.com"],
     // 👈 FRONTEND PORT
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   })
 );
+
+
+
+// app.use(cors({
+//   origin: [
+   
+//     "https://your-frontend.onrender.com"
+//   ],
+//   credentials: true
+// }));
+
+
+
+
+
+
+
+
+
+
 
 app.get("/", (req, res) => {
   res.send("Welcome to ElectroDB Server");
