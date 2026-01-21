@@ -6,6 +6,7 @@ const Complaint = require("../models/complaint");
 const verifyFirebaseToken = require("../middleware/verifyFirebaseToken");
 
 
+
 /*---------------- Student Registration Route ----------------------------*/
 router.post("/signup", async (req, res) => {
   try {
