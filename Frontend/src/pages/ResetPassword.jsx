@@ -15,7 +15,7 @@ const ForgotPassword = ({ onBack }) => {
     const token = localStorage.getItem("resetToken");
     if (!token) return alert("No reset token found. Please verify your identity again."); 
     try {
-      const response = await fetch("http://localhost:3000/student/reset-password", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/student/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
