@@ -1,29 +1,34 @@
-require('dotenv').config(); // Load environment variables
+const path = require("path");
+const fs = require("fs");
 const admin = require("firebase-admin");
 
-// Fail fast if any expected env vars are missing so we don't get a cryptic key error later.
-const requiredEnv = [
-  'FIREBASE_PROJECT_ID',
-  'FIREBASE_CLIENT_EMAIL',
-  'FIREBASE_PRIVATE_KEY',
-];
+const loadServiceAccount = () => {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    return JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  }
 
-const missing = requiredEnv.filter((key) => !process.env[key]);
-if (missing.length) {
-  throw new Error(`Missing Firebase env vars: ${missing.join(', ')}`);
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+    const envPath = path.resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+    if (!fs.existsSync(envPath)) {
+      throw new Error(`Service account file not found at ${envPath}`);
+    }
+    return JSON.parse(fs.readFileSync(envPath, "utf8"));
+  }
+
+  const defaultPath = path.join(__dirname, "config", "firebaseServiceAccount.json");
+  if (fs.existsSync(defaultPath)) {
+    return JSON.parse(fs.readFileSync(defaultPath, "utf8"));
+  }
+
+  throw new Error("Firebase service account not configured");
+};
+
+const serviceAccount = loadServiceAccount();
+
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
 }
-
-// Handle escaped newlines and accidental wrapping quotes in the private key
-const privateKey = process.env.FIREBASE_PRIVATE_KEY
-  .replace(/^"|"$/g, '')
-  .replace(/\\n/g, "\n");
-
-admin.initializeApp({
-  credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey,
-  }),
-});
 
 module.exports = admin;
