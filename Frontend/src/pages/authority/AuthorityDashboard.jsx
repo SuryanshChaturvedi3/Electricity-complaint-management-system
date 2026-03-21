@@ -16,13 +16,20 @@ function AuthorityDashboard() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const normalizeComplaints = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.complaints)) return payload.complaints;
+    return [];
+  };
+
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
         const res = await api.get("/auth/complaints");
-        setComplaints(Array.isArray(res.data) ? res.data : res.data.complaints || []);
+        setComplaints(normalizeComplaints(res.data));
       } catch (err) {
         console.error("FETCH ERROR:", err.response?.data || err.message);
+        setComplaints([]);
       } finally {
         setLoading(false);
       }
@@ -99,7 +106,7 @@ function AuthorityDashboard() {
                       <span className="font-mono text-indigo-400 font-medium">{c.rollnumber}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-mono text-indigo-400 font-medium">{c.name}</span>
+                      <span className="font-mono text-indigo-400 font-medium">{c.studentId?.name || "N/A"}</span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">

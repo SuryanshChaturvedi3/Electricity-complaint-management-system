@@ -10,10 +10,16 @@ function TechnicianDashboard() {
   useEffect(() => {
     api.get("/technician/complaints")
       .then(res => {
-        setComplaints(res.data.complaints || res.data || []);
+        const nextComplaints = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.complaints)
+            ? res.data.complaints
+            : [];
+        setComplaints(nextComplaints);
       })
       .catch(err => {
         console.log("Dashboard API error:", err.response?.status);
+        setComplaints([]);
       })
       .finally(() => setLoading(false));
   }, []);

@@ -11,8 +11,14 @@ function MyComplaints() {
   useEffect(() => {
     api.get("/student/complaints")
       .then(res => {
-        setComplaints(res.data.complaints || []);
+        const nextComplaints = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.complaints)
+            ? res.data.complaints
+            : [];
+        setComplaints(nextComplaints);
       })
+      .catch(() => setComplaints([]))
       .finally(() => setLoading(false));
   }, []);
 
