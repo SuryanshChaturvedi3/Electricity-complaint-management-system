@@ -37,7 +37,8 @@ router.post("/signup", async (req, res) => {
     };
 
     const token = generateToken(payload);
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, { httpOnly: true, secure: true,       // 🔥 required for HTTPS (Render)
+    sameSite: "None" });
     res.status(201).json({ message: "Student registered successfully", token });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
@@ -58,7 +59,8 @@ router.post("/login", async (req, res) => {
     }
     const payload = { message: "Login successful", studentId: student._id, role: student.role };
     const token = generateToken(payload);
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, { httpOnly: true,secure: true,       // 🔥 required for HTTPS (Render)
+    sameSite: "None" });
     res.status(200).json({ message: "Login successful", token, name: student.name, role: student.role });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
