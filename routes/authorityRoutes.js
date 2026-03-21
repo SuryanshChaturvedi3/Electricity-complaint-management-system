@@ -49,6 +49,10 @@ router.post("/login", async (req, res) => {
 /*----------Get All Complaints Route---------*/
 router.get("/complaints", authenticateJWT, async (req, res) => {
   try {
+    if (req.user.role !== "authority") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
     const complaints = await Complaint.find()
       .populate("studentId", "name email mobileNumber rollnumber")
       .populate("technicianId", "name email")
@@ -91,7 +95,7 @@ router.put("/complaints/:id/approve", authenticateJWT, async (req, res) => {
     // 4️⃣ Update status + approvedBy
     complaint.approvalStatus = "approved";
     //console.log(complaint.approvalStatus);
-    complaint.approvedBy = req.user.authorityId;
+    complaint.approvedBy = req.user.id;
 
     await complaint.save();
     console.log(" Complaint approved");

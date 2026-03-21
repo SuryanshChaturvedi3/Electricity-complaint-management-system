@@ -12,21 +12,25 @@ function generateToken(payload){
 /*-------JWT Authentication Middleware-------*/
 
 const authenticateJWT = (req, res, next) => {
-    
-
     try {
-        const token = req.cookies?.token; // Token expected in cookies
-        console.log("Token:",token);
+        const cookieToken = req.cookies?.token;
+        const authHeader = req.headers?.authorization;
+        const bearerToken = authHeader && authHeader.startsWith("Bearer ")
+            ? authHeader.split(" ")[1]
+            : null;
+        const token = cookieToken || bearerToken;
+
+        console.log("Token present:", !!token);
         if (!token) {
-            return res.redirect('/login'); // Redirect to login if no token
+            return res.status(401).json({ message: "Unauthorized: token missing" });
         }
 
         const decoded = jwt.verify(token, SECRET_KEY);
         req.user = decoded;
-        return next(); // Proceed to next middleware or route handler
+        return next();
     } catch (error) {
         console.log("Token error", error);
-        return res.redirect('/login'); // Redirect to login on error
+        return res.status(401).json({ message: "Unauthorized: invalid token" });
     }
 };
 
