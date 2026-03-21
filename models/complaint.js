@@ -35,7 +35,7 @@ const complaintSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-   approvalStatus: {
+    approvalStatus: {
       type: String,
       enum: ["pending", "approved", "assigned", "resolved", "rejected"],
       default: "pending",
@@ -44,8 +44,7 @@ const complaintSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "authority",
     },
-    // Assigned technician
-     technicianId: {
+    technicianId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "technician",
       default: null,
@@ -53,17 +52,12 @@ const complaintSchema = new mongoose.Schema(
     technicianname: {
       type: String,
       default: "null"
-      
     },
-     resolvedAt: {
+    resolvedAt: {
       type: Date,
-    },
-      createdAt: {
-        type: Date,
-        default: Date.now,
-        },
-    
-      }
+    }
+  },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Complaint", complaintSchema);

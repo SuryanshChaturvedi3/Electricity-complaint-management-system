@@ -49,7 +49,10 @@ router.post("/login", async (req, res) => {
 /*----------Get All Complaints Route---------*/
 router.get("/complaints", authenticateJWT, async (req, res) => {
   try {
-    const complaints = await Complaint.find().sort({ createdAt: -1 });
+    const complaints = await Complaint.find()
+      .populate("studentId", "name email mobileNumber rollnumber")
+      .populate("technicianId", "name email")
+      .sort({ createdAt: -1 });
     console.log(complaints);
     res.status(200).json({ complaints });
   } catch (error) {
