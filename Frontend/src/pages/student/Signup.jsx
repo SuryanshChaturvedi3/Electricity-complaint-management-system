@@ -67,7 +67,7 @@ function StudentSignup() {
                   <input
                     name={key}
                     type={key === "password" ? "password" : "text"}
-                    placeholder={`Your ${key}`}
+                    placeholder={`${key}`}
                     onChange={handleChange}
                     required
                     /* 3. Dark Input Styling */

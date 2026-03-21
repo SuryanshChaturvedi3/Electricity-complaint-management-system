@@ -52,6 +52,7 @@ studentSchema.pre('save', async function() {
         const salt = await bcrypt.genSalt(10);
         const hashedpassword = await bcrypt.hash(student.password, salt);
         student.password = hashedpassword;
+        
         // return next() ki zaroorat nahi hai async function mein
     } catch (error) {
         throw error; // next(error) ki jagah error throw karein

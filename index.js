@@ -38,30 +38,12 @@ app.use(
     origin: process.env.ALLOWED_ORIGINS
       ? process.env.ALLOWED_ORIGINS.split(",")
       : [ "http://localhost:5173",
-        "https://electricity-complaint-management-system-1.onrender.com"],
+       "https://electricity-complaint-management-system.onrender.com"],
     // 👈 FRONTEND PORT
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   })
 );
-
-
-
-// app.use(cors({
-//   origin: [
-   
-//     "https://your-frontend.onrender.com"
-//   ],
-//   credentials: true
-// }));
-
-
-
-
-
-
-
-
 
 
 

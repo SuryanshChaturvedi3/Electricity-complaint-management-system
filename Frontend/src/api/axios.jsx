@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: " import.meta.env.VITE_API_BASE_URL,", // tumhara backend
-  withCredentials: true             // JWT cookie ke liye
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000",
+  withCredentials: true,
 });
 
 export default api;
