@@ -110,6 +110,7 @@ router.post("/complaint", authenticateJWT, async (req, res) => {
     }
 
     const newComplaint = new Complaint({
+      studentId,
       hostelname,
       roomnumber,
       wardenname,
