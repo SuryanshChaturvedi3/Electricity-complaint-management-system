@@ -1,26 +1,30 @@
 const express = require("express");
-const router = express.Router(); // Creating router instance
+const router = express.Router();
+
 const { authenticateJWT, generateToken } = require("../jwt");
 const Student = require("../models/student");
 const Complaint = require("../models/complaint");
 const verifyFirebaseToken = require("../middleware/verifyFirebaseToken");
 
-
-
 /*---------------- Student Registration Route ----------------------------*/
 router.post("/signup", async (req, res) => {
   try {
+    console.log("🔥 Signup API hit");
     const { name, email, password, mobileNumber } = req.body;
-    console.log(req.body);
-    // Check if student with the same email already exists
-    const StudentExists = await Student.findOne({ email });
-    if (StudentExists) {
-      return res
-        .status(400)
-        .json({ message: "Student with this email already exists" });
+
+    if (!name || !email || !password || !mobileNumber) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    /*------- Creating new student-------*/
+    // Check existing student
+    const existingStudent = await Student.findOne({ email });
+    if (existingStudent) {
+      return res.status(400).json({
+        message: "Student with this email already exists",
+      });
+    }
+
+    // Create student
     const newStudent = new Student({
       name,
       email,
@@ -28,64 +32,109 @@ router.post("/signup", async (req, res) => {
       mobileNumber,
     });
 
-    const response = await newStudent.save();
+    const savedStudent = await newStudent.save();
 
-    const payload = {
-      message: "Student registered successfully",
-      studentId: response._id,
-      role: response.role
-    };
+    // Generate token
+    const token = generateToken({
+      studentId: savedStudent._id,
+      role: savedStudent.role,
+    });
 
-    const token = generateToken(payload);
-    res.cookie("token", token, { httpOnly: true, secure: true,       // 🔥 required for HTTPS (Render)
-    sameSite: "None" });
-    res.status(201).json({ message: "Student registered successfully", token });
+    // ❌ COOKIE REMOVED (CORS issue avoid karne ke liye)
+    // res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "None" });
+
+    return res.status(201).json({
+      message: "✅ Student registered successfully",
+      token,
+      studentId: savedStudent._id,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error: error.message });
+    console.error("❌ Signup Error:", error);
+    return res.status(500).json({
+      message: "Server Error",
+      error: error.message,
+    });
   }
 });
 
 /*---------------- Student Login Route ----------------------------*/
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
   try {
+    console.log("🔥 Login API hit");
+
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password required",
+      });
+    }
+
     const student = await Student.findOne({ email });
     if (!student) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
     }
+
     const isMatch = await student.comparePassword(password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
     }
-    const payload = { message: "Login successful", studentId: student._id, role: student.role };
-    const token = generateToken(payload);
-    res.cookie("token", token, { httpOnly: true,secure: true,       // 🔥 required for HTTPS (Render)
-    sameSite: "None" });
-    res.status(200).json({ message: "Login successful", token, name: student.name, role: student.role });
+
+    const token = generateToken({
+      studentId: student._id,
+      role: student.role,
+    });
+
+    // ❌ COOKIE REMOVED
+    // res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "None" });
+
+    return res.status(200).json({
+      message: "✅ Login successful",
+      token,
+      name: student.name,
+      role: student.role,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error: error.message });
+    console.error("❌ Login Error:", error);
+    return res.status(500).json({
+      message: "Server Error",
+      error: error.message,
+    });
   }
 });
 
-/*---------------- Protected Route Example ----------------------------*/
+/*---------------- Protected Dashboard ----------------------------*/
 router.get("/dashboard", authenticateJWT, async (req, res) => {
   try {
     const studentId = req.user.studentId;
-    console.log("ID:", studentId);
+
     const student = await Student.findById(studentId);
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
-    res.status(200).json({ message: "Dashboard data", student });
-  } catch (error) {
-    res.status(500).json({ message: "Server Error", error: error.message });
-  }
-}); 
 
-/*---------------- Student Complaint Submission Route ----------------------------*/
+    return res.status(200).json({
+      message: "Dashboard data",
+      student,
+    });
+  } catch (error) {
+    console.error("❌ Dashboard Error:", error);
+    return res.status(500).json({
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+});
+
+/*---------------- Submit Complaint ----------------------------*/
 router.post("/complaint", authenticateJWT, async (req, res) => {
   try {
     const studentId = req.user.studentId;
+
     const {
       hostelname,
       roomnumber,
@@ -95,8 +144,6 @@ router.post("/complaint", authenticateJWT, async (req, res) => {
       description,
       category,
     } = req.body;
-
-    console.log(req.body);
 
     const existingComplaint = await Complaint.findOne({
       rollnumber,
@@ -122,42 +169,44 @@ router.post("/complaint", authenticateJWT, async (req, res) => {
       category,
     });
 
-    const response = await newComplaint.save();
-    res.status(201).json({
-        message: "Complaint submitted successfully",
-        complaintId: response._id,
-      });
-  }
-  catch (error)
-   {
-    res.status(500).json({ message: "Server Error", error: error.message });
-  }
-});
+    const savedComplaint = await newComplaint.save();
 
-/*-----------Student View Their Complaints Route ------------------*/
-router.get("/complaints", authenticateJWT, async (req, res) => {
-  try {
-    // ✅ token se student id
-    const studentId = req.user.studentId;
-
-    // ✅ sirf studentId se complaints
-    const complaints = await Complaint.find({ studentId })
-      .sort({ createdAt: -1 });
-
-    res.status(200).json({
-      message: "Complaints fetched successfully",
-      complaints,
+    return res.status(201).json({
+      message: "✅ Complaint submitted successfully",
+      complaintId: savedComplaint._id,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
+    console.error("❌ Complaint Error:", error);
+    return res.status(500).json({
       message: "Server Error",
       error: error.message,
     });
   }
 });
 
-/*----------Reset Password Route---------*/
+/*---------------- Get Student Complaints ----------------------------*/
+router.get("/complaints", authenticateJWT, async (req, res) => {
+  try {
+    const studentId = req.user.studentId;
+
+    const complaints = await Complaint.find({ studentId }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json({
+      message: "Complaints fetched successfully",
+      complaints,
+    });
+  } catch (error) {
+    console.error("❌ Fetch Complaints Error:", error);
+    return res.status(500).json({
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+});
+
+/*---------- Reset Password Route ---------*/
 router.post("/reset-password", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -167,21 +216,27 @@ router.post("/reset-password", async (req, res) => {
 
     const token = authHeader.split(" ")[1];
     const decodedToken = await verifyFirebaseToken(token);
-    const studentId = decodedToken.uid; 
+    const studentId = decodedToken.uid;
+
     const { newPassword } = req.body;
+
     const student = await Student.findById(studentId);
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
+
     student.password = newPassword;
-    
     await student.save();
 
-    res.status(200).json({ message: "Password reset successful" });
-
+    return res.status(200).json({
+      message: "✅ Password reset successful",
+    });
   } catch (error) {
-    console.error("Error resetting password:", error);
-    res.status(500).json({ message: "Server Error", error: error.message });
+    console.error("❌ Reset Password Error:", error);
+    return res.status(500).json({
+      message: "Server Error",
+      error: error.message,
+    });
   }
 });
 
