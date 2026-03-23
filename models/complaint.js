@@ -42,11 +42,11 @@ const complaintSchema = new mongoose.Schema(
     },
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "authority",
+      ref: "Authority",
     },
     technicianId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "technician",
+      ref: "Technician",
       default: null,
     },
     technicianname: {
