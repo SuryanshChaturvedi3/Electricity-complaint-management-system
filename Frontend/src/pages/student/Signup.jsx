@@ -24,7 +24,7 @@ function StudentSignup() {
       alert("Signup successful");
       navigate("/student/login");
     // eslint-disable-next-line no-unused-vars
-    } catch (err) {
+    } catch (error) {
       alert("Error during signup. Please try again.");
     }
   };
@@ -39,11 +39,16 @@ function StudentSignup() {
     }
   };
 
+  // Define user-friendly placeholders here
+  const placeholders = {
+    name: "John Doe",
+    email: "john@university.edu",
+    password: "••••••••", // Classic password mask placeholder
+    mobileNumber: "+1 234 567 890",
+  };
+
   return (
-    /* 1. Black Background */
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12">
-      
-      {/* 2. Greyish Card with Shadow & Hover Effect */}
       <div className="w-full max-w-md bg-slate-900 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-slate-800 overflow-hidden transition-all duration-500 hover:border-slate-700 hover:shadow-blue-900/10">
         
         <div className="h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 w-full" />
@@ -67,10 +72,9 @@ function StudentSignup() {
                   <input
                     name={key}
                     type={key === "password" ? "password" : "text"}
-                    placeholder={`${key}`}
+                    placeholder={placeholders[key]}
                     onChange={handleChange}
                     required
-                    /* 3. Dark Input Styling */
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-zinc-800 bg-zinc-950/50 text-white outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all placeholder:text-zinc-700"
                   />
                 </div>
