@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Technician = require("./models/technician");
 
 async function seedTechnician() {
-  await mongoose.connect( process.env.MONGO_URI || "mongodb://127.0.0.1:27017/ElectroDB");
+  await mongoose.connect( "mongodb+srv://suryanshchaturvedi246_db_user:suryansh1234@cluster0.m0azjxr.mongodb.net/ElectroDB"  || "mongodb://127.0.0.1:27017/ElectroDB");
   console.log("DB Connected");
 
   const existing = await Technician.findOne({
