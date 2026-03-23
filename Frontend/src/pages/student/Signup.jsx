@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Lock, Phone, UserPlus, ArrowRight } from "lucide-react";
+import { User, Mail, Lock, Phone, UserPlus, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 function StudentSignup() {
   const [form, setForm] = useState({
@@ -11,6 +11,7 @@ function StudentSignup() {
     mobileNumber: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -19,13 +20,33 @@ function StudentSignup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // 1. Basic Email Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    // 2. Mobile Number Validation (Exact 10 digits)
+    const mobileRegex = /^[0-9]{10}$/;
+    if (!mobileRegex.test(form.mobileNumber)) {
+      alert("Mobile number must be exactly 10 digits.");
+      return;
+    }
+
+    // 3. Password Length Validation
+    if (form.password.length < 8) {
+      alert("Password must be at least 8 characters long.");
+      return;
+    }
+
     try {
       await api.post("/student/signup", form);
       alert("Signup successful");
       navigate("/student/login");
-    // eslint-disable-next-line no-unused-vars
     } catch (error) {
-      alert("Error during signup. Please try again.");
+      alert(error.response?.data?.message || "Error during signup. Please try again.");
     }
   };
 
@@ -39,12 +60,11 @@ function StudentSignup() {
     }
   };
 
-  // Define user-friendly placeholders here
   const placeholders = {
     name: "John Doe",
     email: "john@university.edu",
-    password: "••••••••", // Classic password mask placeholder
-    mobileNumber: "+1 234 567 890",
+    password: "e.g. Abc@123",
+    mobileNumber: "9876543210",
   };
 
   return (
@@ -69,14 +89,30 @@ function StudentSignup() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-600 group-focus-within:text-blue-500 transition-colors">
                     {getIcon(key)}
                   </div>
+                  
                   <input
                     name={key}
-                    type={key === "password" ? "password" : "text"}
+                    // Toggle between password and text type
+                    type={key === "password" ? (showPassword ? "text" : "password") : (key === "email" ? "email" : "text")}
                     placeholder={placeholders[key]}
                     onChange={handleChange}
                     required
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-zinc-800 bg-zinc-950/50 text-white outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all placeholder:text-zinc-700"
+                    // HTML5 validation hints
+                    minLength={key === "password" ? 8 : undefined}
+                    maxLength={key === "mobileNumber" ? 10 : undefined}
+                    className="w-full pl-12 pr-12 py-3 rounded-xl border border-zinc-800 bg-zinc-950/50 text-white outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all placeholder:text-zinc-700"
                   />
+
+                  {/* Show/Hide Toggle for Password field */}
+                  {key === "password" && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-600 hover:text-zinc-400 transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
