@@ -63,7 +63,7 @@ function StudentSignup() {
   const placeholders = {
     name: "John Doe",
     email: "john@university.edu",
-    password: "e.g. Abc@123",
+    password: "e.g. Abc@123 at least 8 characters",
     mobileNumber: "9876543210",
   };
 
