@@ -4,7 +4,7 @@ const Authority = require("./models/authority");
 //require("dotenv").config();
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/ElectroDB")
+  .connect("mongodb+srv://suryanshchaturvedi246_db_user:suryansh1234@cluster0.m0azjxr.mongodb.net/ElectroDB" || "mongodb://127.0.0.1:27017/ElectroDB")
   .then(async () => {
     console.log("DB Connected");
 
